@@ -8,14 +8,22 @@ export class BrowserManager {
   private launching: Promise<void> | null = null;
 
   async launch(options?: LaunchOptions): Promise<void> {
+    // Check if sandbox should be enabled via environment variable
+    const enableSandbox = process.env.CHARLOTTE_CHROMIUM_SANDBOX === "true";
+    
+    const defaultArgs = [
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+    ];
+    
+    // Only add no-sandbox flags if sandbox is not explicitly enabled
+    if (!enableSandbox) {
+      defaultArgs.unshift("--disable-setuid-sandbox", "--no-sandbox");
+    }
+    
     this.launchOptions = {
       headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-      ],
+      args: defaultArgs,
       ...options,
     };
 
